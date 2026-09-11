@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TaskFlow — Scheduling System</title>
+<link rel="stylesheet" href="style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+</head>
+<body>
+<div class="app" id="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon"><i class="ti ti-bolt"></i></div>
+        <div>
+          <span class="logo-name">TaskFlow</span>
+          <span class="logo-sub">Scheduling System</span>
+        </div>
+      </div>
+      <button class="sidebar-toggle" id="sidebarToggle" title="Collapse sidebar">
+        <i class="ti ti-layout-sidebar-left-collapse"></i>
+      </button>
+    </div>
+
+    <div class="sidebar-body">
+      <div class="nav-section-label">Views</div>
+      <nav class="nav">
+        <div class="nav-item active" data-view="all"><i class="ti ti-layout-list"></i><span>All tasks</span><span class="nbadge" id="nb-all">0</span></div>
+        <div class="nav-item" data-view="today"><i class="ti ti-calendar-today"></i><span>Today</span><span class="nbadge" id="nb-today">0</span></div>
+        <div class="nav-item" data-view="upcoming"><i class="ti ti-calendar-week"></i><span>Upcoming</span><span class="nbadge" id="nb-up">0</span></div>
+        <div class="nav-item" data-view="overdue"><i class="ti ti-alert-triangle"></i><span>Overdue</span><span class="nbadge danger" id="nb-od">0</span></div>
+      </nav>
+
+      <div class="nav-section-label">Insights</div>
+      <nav class="nav">
+        <div class="nav-item" data-view="analytics"><i class="ti ti-chart-pie"></i><span>Analytics</span></div>
+        <div class="nav-item" data-view="calendar"><i class="ti ti-calendar"></i><span>Calendar</span></div>
+        <div class="nav-item" data-view="trash"><i class="ti ti-trash"></i><span>Trash</span><span class="nbadge" id="nb-tr">0</span></div>
+      </nav>
+
+      <div class="nav-section-label">Categories</div>
+      <nav class="nav" id="cat-nav"></nav>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="stat-row">
+        <div class="stat-pill">
+          <div class="stat-num" id="sm-done">0</div>
+          <div class="stat-lbl">Done</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num" id="sm-pct">0%</div>
+          <div class="stat-lbl">Rate</div>
+        </div>
+        <div class="stat-pill">
+          <div class="stat-num" id="sm-total">0</div>
+          <div class="stat-lbl">Total</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" id="mobileMenu"><i class="ti ti-menu-2"></i></button>
+        <h1 class="view-title" id="vtitle">All tasks</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="search-box">
+          <i class="ti ti-search"></i>
+          <input type="text" id="srch" placeholder="Search tasks…" autocomplete="off">
+          <button class="search-clear" id="searchClear" style="display:none"><i class="ti ti-x"></i></button>
+        </div>
+        <select class="sort-sel" id="srt">
+          <option value="due">Due date</option>
+          <option value="priority">Priority</option>
+          <option value="created">Created</option>
+          <option value="progress">Progress</option>
+          <option value="title">Name A–Z</option>
+        </select>
+        <button class="btn btn-accent" id="newTaskBtn">
+          <i class="ti ti-plus"></i><span>New task</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="content" id="content">
+      <div class="filter-row" id="frow">
+        <button class="chip on" data-filter="all">All</button>
+        <button class="chip" data-filter="critical"><span class="chip-dot critical"></span>Critical</button>
+        <button class="chip" data-filter="high"><span class="chip-dot high"></span>High</button>
+        <button class="chip" data-filter="medium"><span class="chip-dot medium"></span>Medium</button>
+        <button class="chip" data-filter="low"><span class="chip-dot low"></span>Low</button>
+        <button class="chip" data-filter="done"><i class="ti ti-check"></i>Completed</button>
+        <button class="chip" data-filter="inprogress"><i class="ti ti-clock"></i>In progress</button>
+        <button class="chip" data-filter="nodate"><i class="ti ti-calendar-off"></i>No date</button>
+      </div>
+      <div id="tlist"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Task Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-header">
+      <h2 id="modal-heading"><i class="ti ti-plus" id="micon"></i><span id="mtitle">New task</span></h2>
+      <button class="modal-close" id="modalClose"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="modal-body">
+      <div class="frow">
+        <label for="f-t">Task title <span class="req">*</span></label>
+        <input type="text" id="f-t" placeholder="What needs to be done?" maxlength="200">
+      </div>
+      <div class="frow">
+        <label for="f-n">Notes &amp; description</label>
+        <textarea id="f-n" placeholder="Add context, links, or instructions…" rows="3"></textarea>
+      </div>
+      <div class="fgrid two">
+        <div class="frow">
+          <label for="f-p">Priority</label>
+          <select id="f-p">
+            <option value="low">🟢 Low</option>
+            <option value="medium" selected>🟣 Medium</option>
+            <option value="high">🟠 High</option>
+            <option value="critical">🔴 Critical</option>
+          </select>
+        </div>
+        <div class="frow">
+          <label for="f-c">Category</label>
+          <select id="f-c">
+            <option>Work</option><option>Personal</option><option>Study</option>
+            <option>Health</option><option>Finance</option><option>Project</option><option>Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="fgrid two">
+        <div class="frow">
+          <label for="f-d">Due date</label>
+          <input type="date" id="f-d">
+        </div>
+        <div class="frow">
+          <label for="f-tm">Due time</label>
+          <input type="time" id="f-tm">
+        </div>
+      </div>
+      <div class="fgrid two">
+        <div class="frow">
+          <label for="f-e">Effort estimate</label>
+          <select id="f-e">
+            <option value="15">15 min</option><option value="30">30 min</option>
+            <option value="60" selected>1 hour</option><option value="120">2 hours</option>
+            <option value="240">Half day</option><option value="480">Full day</option>
+            <option value="1440">Multi-day</option>
+          </select>
+        </div>
+        <div class="frow">
+          <label for="f-repeat">Repeat</label>
+          <select id="f-repeat">
+            <option value="none">Does not repeat</option>
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+        </div>
+      </div>
+      <div class="frow" id="resch-row" style="display:none">
+        <label for="f-rr">Reschedule reason</label>
+        <input type="text" id="f-rr" placeholder="Why is this being rescheduled?">
+      </div>
+      <div class="frow">
+        <label>Subtasks <span class="hint">— press Enter to add</span></label>
+        <div class="subtask-input-wrap">
+          <input type="text" id="f-si" placeholder="Add a subtask…">
+          <button class="btn btn-sm" id="addSubBtn"><i class="ti ti-plus"></i></button>
+        </div>
+        <div id="f-sl"></div>
+      </div>
+      <div class="frow">
+        <label for="f-prog">Progress — <span id="pv" class="mono">0</span>%</label>
+        <div class="range-wrap">
+          <input type="range" min="0" max="100" step="5" value="0" id="f-prog">
+          <div class="range-track-fill" id="range-fill" style="width:0%"></div>
+        </div>
+      </div>
+      <div class="frow">
+        <label for="f-tags">Tags <span class="hint">— comma separated</span></label>
+        <input type="text" id="f-tags" placeholder="e.g. urgent, review, client">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="cancelBtn">Cancel</button>
+      <button class="btn btn-accent" id="msave">
+        <i class="ti ti-device-floppy"></i><span id="msbtnlbl">Save task</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="modal-overlay" id="confirmDialog" style="display:none">
+  <div class="modal confirm-modal">
+    <div class="modal-header">
+      <h2><i class="ti ti-alert-triangle" style="color:var(--danger)"></i><span id="confirm-title">Confirm action</span></h2>
+    </div>
+    <div class="modal-body">
+      <p id="confirm-msg" style="color:var(--text-secondary);font-size:14px;line-height:1.6"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="confirm-cancel">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok">Confirm</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
