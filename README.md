@@ -8,7 +8,7 @@ A clean, fast, frontend-only task & scheduling app built with vanilla JavaScript
 ![Static Badge](https://img.shields.io/badge/Storage-LocalStorage-6C63FF)
 ![Static Badge](https://img.shields.io/badge/License-Educational-orange)
 
-**[🔗 Live Demo](#)** &nbsp;·&nbsp; **[📂 Visit Repo](#)**
+**[🔗 Live Demo](https://gammii90210.github.io/taskflow-app/)** &nbsp;·&nbsp; **[📂 Visit Repo](https://github.com/Gammii90210/taskflow-app)**
 
 ---
 
